@@ -1,0 +1,8 @@
+{
+  "name": "miu-miu-20-10",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}
