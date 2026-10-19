@@ -3,7 +3,7 @@ import {
   createInitialState,
   isFinalGiftUnlocked,
   openGift,
-} from './src/interaction-state.mjs';
+} from './src/interaction-state.js';
 
 const giftCount = 3;
 const heartCount = 5;
