@@ -87,6 +87,10 @@ test('labels the final action as viewing the last wish without the helper senten
   assert.doesNotMatch(appMarkup, /Đủ yêu thương rồi\. Em bấm mở chiếc hộp cuối cùng nhé\./);
 });
 
+test('keeps the final completion message free of the real-gift invitation', () => {
+  assert.doesNotMatch(indexMarkup, /Món quà thật của em đang chờ ở ngoài đời\. Tối nay nhớ để dành bụng nhé\./);
+});
+
 test('uses a polished responsive scrollbar for the page and final message popup', () => {
   assert.match(stylesMarkup, /html::-webkit-scrollbar\s*\{/);
   assert.match(stylesMarkup, /html::-webkit-scrollbar-thumb\s*\{/);
