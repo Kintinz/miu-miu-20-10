@@ -20,6 +20,19 @@ const indexMarkup = readFileSync(new URL('../index.html', import.meta.url), 'utf
 const appMarkup = readFileSync(new URL('../app.js', import.meta.url), 'utf8');
 const stylesMarkup = readFileSync(new URL('../styles.css', import.meta.url), 'utf8');
 
+test('publishes the selected social preview metadata', () => {
+  assert.match(indexMarkup, /<meta property="og:type" content="website" \/>/);
+  assert.match(indexMarkup, /<meta property="og:title" content="Miu Miu gửi lời yêu \| Chúc mừng 20\/10" \/>/);
+  assert.match(indexMarkup, /<meta property="og:url" content="https:\/\/kintinz\.github\.io\/miu-miu-20-10\/" \/>/);
+  assert.match(indexMarkup, /<meta\s+property="og:image"/);
+  assert.match(indexMarkup, /content="https:\/\/kintinz\.github\.io\/miu-miu-20-10\/assets\/social-preview\.png"/);
+  assert.match(indexMarkup, /<meta property="og:image:width" content="1479" \/>/);
+  assert.match(indexMarkup, /<meta property="og:image:height" content="826" \/>/);
+  assert.match(indexMarkup, /<meta name="twitter:card" content="summary_large_image" \/>/);
+  assert.match(indexMarkup, /<meta\s+name="twitter:image"/);
+  assert.match(indexMarkup, /content="https:\/\/kintinz\.github\.io\/miu-miu-20-10\/assets\/social-preview\.png"/);
+});
+
 test('uses simple line icons for gift cards and the final gift button', () => {
   const giftCardIcons = [...indexMarkup.matchAll(/<div class="gift-card-icon\b[\s\S]*?<\/div>/g)];
   const finalGiftButton = indexMarkup.match(/<button[^>]*id="final-gift-button"[\s\S]*?<\/button>/);
