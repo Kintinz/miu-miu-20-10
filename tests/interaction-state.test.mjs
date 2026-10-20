@@ -76,6 +76,17 @@ test('uses the full final letter message when the thank-you gift opens', () => {
   );
 });
 
+test('labels the final action as viewing the last wish without the helper sentence', () => {
+  const finalSection = indexMarkup.match(/<section class="final-section[\s\S]*?<\/section>/);
+  const finalButton = indexMarkup.match(/<button[^>]*id="final-gift-button"[\s\S]*?<\/button>/);
+
+  assert.ok(finalSection);
+  assert.match(finalSection[0], /\shidden>/);
+  assert.ok(finalButton);
+  assert.match(finalButton[0], />\s*Xem lời chúc cuối cùng\s*/);
+  assert.doesNotMatch(appMarkup, /Đủ yêu thương rồi\. Em bấm mở chiếc hộp cuối cùng nhé\./);
+});
+
 test('uses a polished responsive scrollbar for the page and final message popup', () => {
   assert.match(stylesMarkup, /html::-webkit-scrollbar\s*\{/);
   assert.match(stylesMarkup, /html::-webkit-scrollbar-thumb\s*\{/);

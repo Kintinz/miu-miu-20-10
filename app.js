@@ -332,7 +332,6 @@ function updateFinalGiftState() {
   elements.finalButton.disabled = false;
   elements.finalSection.classList.add('is-unlocked');
   elements.finalTitle.textContent = 'Miu Miu đã sẵn sàng!';
-  elements.finalDescription.textContent = 'Đủ yêu thương rồi. Em bấm mở chiếc hộp cuối cùng nhé.';
   elements.heartMessage.textContent = 'Meo! Đủ yêu thương để mở quà rồi!';
   unlockNextJourneySection(true);
   announce('Đã đủ yêu thương. Hộp quà cuối cùng đã được mở khóa.');
