@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#fff8f0" />
+    <meta name="description" content="Những bức ảnh sẽ được thêm vào kho lưu trữ kỷ niệm của đôi mình." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Miu Miu · Kho ảnh bổ sung" />
+    <meta property="og:description" content="Một góc riêng để lưu thêm những kỷ niệm mới của đôi mình." />
+    <meta property="og:url" content="https://kintinz.github.io/miu-miu-20-10/more-memories.html" />
+    <meta property="og:image" content="https://kintinz.github.io/miu-miu-20-10/assets/social-preview.png" />
+    <meta property="og:image:alt" content="Chúc mừng 20/10 gửi vợ yêu của anh" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>Miu Miu · Kho ảnh bổ sung</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell archive-page extra-page">
+      <header class="site-header" aria-label="Điều hướng trang">
+        <a class="brand" href="index.html#top" aria-label="Miu Miu - về kho lưu trữ chính">
+          <span class="brand-mark" aria-hidden="true">♥</span>
+          <span>Miu Miu</span>
+        </a>
+        <span class="header-note">kho lưu trữ kỷ niệm</span>
+      </header>
+
+      <main id="top">
+        <section class="extra-hero section-wrap" aria-labelledby="extra-title">
+          <div>
+            <p class="eyebrow"><span aria-hidden="true">✦</span> Những trang mình sẽ viết tiếp</p>
+            <h1 id="extra-title">Kho ảnh bổ sung</h1>
+            <p class="hero-subtitle">Để dành cho những ngày sau này</p>
+            <p class="hero-lede">
+              Trang này là một góc riêng để thêm những bức ảnh mới vào repo. Khi có ảnh,
+              chỉ cần khai báo trong manifest là chúng sẽ xuất hiện ở đây.
+            </p>
+            <a class="button button-card" href="index.html#memory-archive">← Về 12 kỷ niệm</a>
+          </div>
+          <div class="extra-hero-note" aria-hidden="true">
+            <span>♥</span>
+            <p>còn nhiều ngày<br />đẹp phía trước</p>
+          </div>
+        </section>
+
+        <section class="extra-memory-section section-wrap" aria-labelledby="extra-memory-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Mở rộng cuốn album</p>
+              <h2 id="extra-memory-title">Những kỷ niệm mới</h2>
+            </div>
+            <p class="section-aside">Ảnh được thêm thủ công vào <code>assets/memories-extra</code>.</p>
+          </div>
+
+          <div class="extra-memory-grid" id="extra-memory-grid" aria-live="polite"></div>
+          <div class="extra-empty-state" id="extra-memory-empty" role="status">
+            <span class="extra-empty-heart" aria-hidden="true">♡</span>
+            <h3>Trang này đang chờ những tấm ảnh mới</h3>
+            <p>Chưa có ảnh bổ sung. Khi anh gửi ảnh, mình sẽ đặt chúng vào đây để lưu lại cùng 12 kỷ niệm ban đầu.</p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer" id="site-footer">
+        <a href="index.html#top">Về trang lưu trữ chính <span aria-hidden="true">→</span></a>
+        <span>Mỗi khoảnh khắc đều đáng được lưu lại. <span aria-hidden="true">♥</span></span>
+      </footer>
+    </div>
+
+    <dialog class="photo-modal" id="extra-photo-modal" aria-labelledby="extra-photo-title" aria-describedby="extra-photo-caption">
+      <div class="photo-modal-card">
+        <button class="message-modal-close" id="extra-photo-close" type="button" aria-label="Đóng ảnh">×</button>
+        <div class="photo-modal-image-wrap"><img id="extra-photo-image" src="" alt="" /></div>
+        <div class="photo-modal-copy">
+          <p class="eyebrow" id="extra-photo-counter">Ảnh bổ sung</p>
+          <h2 id="extra-photo-title">Một khoảnh khắc của đôi mình</h2>
+          <p id="extra-photo-caption">Một kỷ niệm mới đang được lưu lại.</p>
+          <div class="photo-modal-actions">
+            <button class="button button-card" id="extra-photo-previous" type="button">← Ảnh trước</button>
+            <button class="button button-card" id="extra-photo-next" type="button">Ảnh sau →</button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <script type="module" src="./more-memories.js"></script>
+  </body>
+</html>

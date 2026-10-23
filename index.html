@@ -4,52 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#fff8f0" />
-    <meta
-      name="description"
-      content="Một món quà nhỏ đáng yêu dành cho em nhân ngày 20/10."
-    />
+    <meta name="description" content="Kho lưu trữ những kỷ niệm dịu dàng của đôi mình." />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Miu Miu gửi lời yêu | Chúc mừng 20/10" />
-    <meta
-      property="og:description"
-      content="Một món quà nhỏ đáng yêu dành cho em nhân ngày 20/10."
-    />
+    <meta property="og:description" content="Kho lưu trữ những kỷ niệm dịu dàng của đôi mình." />
     <meta property="og:url" content="https://kintinz.github.io/miu-miu-20-10/" />
-    <meta
-      property="og:image"
-      content="https://kintinz.github.io/miu-miu-20-10/assets/social-preview.png"
-    />
+    <meta property="og:image" content="https://kintinz.github.io/miu-miu-20-10/assets/social-preview.png" />
     <meta property="og:image:alt" content="Chúc mừng 20/10 gửi vợ yêu của anh" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1479" />
     <meta property="og:image:height" content="826" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Miu Miu gửi lời yêu | Chúc mừng 20/10" />
-    <meta
-      name="twitter:description"
-      content="Một món quà nhỏ đáng yêu dành cho em nhân ngày 20/10."
-    />
-    <meta
-      name="twitter:image"
-      content="https://kintinz.github.io/miu-miu-20-10/assets/social-preview.png"
-    />
-    <title>Miu Miu gửi lời yêu</title>
+    <meta name="twitter:description" content="Kho lưu trữ những kỷ niệm dịu dàng của đôi mình." />
+    <meta name="twitter:image" content="https://kintinz.github.io/miu-miu-20-10/assets/social-preview.png" />
+    <title>Miu Miu · Kho lưu trữ kỷ niệm</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <div class="page-shell">
+    <div class="page-shell archive-page scrapbook-page">
       <header class="site-header" aria-label="Điều hướng trang">
-        <a class="brand" href="#top" aria-label="Miu Miu gửi lời yêu - về đầu trang">
+        <a class="brand" href="#top" aria-label="Miu Miu - về đầu trang">
           <span class="brand-mark" aria-hidden="true">♥</span>
-          <span>Miu Miu gửi lời yêu</span>
+          <span>Miu Miu</span>
         </a>
-        <span class="header-note">một món quà nhỏ cho em</span>
+        <a class="header-note" href="#final-letter">Một lá thư để dành ♡</a>
       </header>
 
       <audio id="background-audio" autoplay loop preload="metadata">
         <source src="assets/audio/cham-em-mot-doi.mp3" type="audio/mpeg" />
       </audio>
-      <div class="music-disc" id="music-indicator" role="status" aria-live="polite" aria-atomic="true" aria-label="Nhạc nền đang phát">
+      <div class="music-player" id="music-player">
+        <button class="music-disc" id="music-indicator" type="button" aria-expanded="false" aria-controls="music-playlist" aria-label="Mở danh sách nhạc nền">
         <svg class="music-disc-record" viewBox="0 0 72 72" aria-hidden="true" focusable="false">
           <circle class="music-disc-vinyl" cx="36" cy="36" r="30"></circle>
           <circle class="music-disc-groove" cx="36" cy="36" r="22"></circle>
@@ -61,131 +47,68 @@
         <span class="music-note music-note-one" aria-hidden="true">♪</span>
         <span class="music-note music-note-two" aria-hidden="true">♫</span>
         <span class="music-note music-note-three" aria-hidden="true">♩</span>
+        </button>
+        <section class="music-playlist" id="music-playlist" aria-labelledby="music-playlist-title" hidden>
+          <div class="music-playlist-header">
+            <div>
+              <p class="eyebrow">Đang lưu lại</p>
+              <h2 id="music-playlist-title">Danh sách nhạc</h2>
+            </div>
+            <button class="music-playlist-close" id="music-playlist-close" type="button" aria-label="Đóng danh sách nhạc">×</button>
+          </div>
+          <p class="music-current-track" id="music-current-track">Chăm Em Một Đời</p>
+          <div class="music-track-list" id="music-track-list" role="listbox" aria-label="Chọn bài hát">
+            <button class="music-track is-active" type="button" data-track-index="0" aria-current="true" role="option">
+              <span><strong>Chăm Em Một Đời</strong><small>Đức Phúc</small></span>
+              <span aria-hidden="true">♫</span>
+            </button>
+          </div>
+          <div class="music-controls" aria-label="Điều khiển danh sách nhạc">
+            <button id="music-previous" type="button" aria-label="Bài trước">←</button>
+            <span aria-hidden="true">♥</span>
+            <button id="music-next" type="button" aria-label="Bài tiếp theo">→</button>
+          </div>
+        </section>
       </div>
       <img class="floating-girl" src="assets/characters/anh-nu-cutout.png" alt="Cô ấy mỉm cười trong chiếc váy hồng" />
 
       <main id="top">
-        <section class="hero section-wrap" aria-labelledby="hero-title">
+        <section class="hero archive-hero section-wrap" aria-labelledby="hero-title">
           <div class="hero-copy">
-            <p class="eyebrow"><span aria-hidden="true">✦</span> 20 tháng 10</p>
-            <h1 id="hero-title">Meo! Anh có một món quà bí mật muốn gửi đến em.</h1>
+            <p class="eyebrow">Always with you</p>
+            <h1 id="hero-title">Kho lưu trữ kỷ niệm</h1>
+            <p class="hero-subtitle">Những ngày mình đã đi qua</p>
             <p class="hero-lede">
-              Miu Miu đã chuẩn bị một nhiệm vụ rất ngắn. Em chỉ cần mở từng điều nhỏ xinh
-              bên dưới để nhận được lời chúc cuối cùng.
+              Cảm ơn em vì đã xuất hiện,<br />
+              đã đồng hành và khiến những ngày bình thường trở nên thật đặc biệt.
             </p>
-            <button class="button button-primary" id="start-button" type="button">
-              Bắt đầu nhiệm vụ <span aria-hidden="true">→</span>
-            </button>
-            <p class="helper-text">Mất khoảng 2 phút · Có vài bất ngờ nho nhỏ</p>
+            <a class="button button-primary" href="#memory-archive">
+              Xem 12 kỷ niệm <span aria-hidden="true">↓</span>
+            </a>
+            <p class="helper-text">Một góc nhỏ để mình có thể quay lại bất cứ lúc nào.</p>
           </div>
 
-          <div class="hero-art" aria-label="Anh đang gửi lời chúc đến em">
-            <span class="sparkle sparkle-one" aria-hidden="true">✦</span>
-            <span class="sparkle sparkle-two" aria-hidden="true">✧</span>
-            <span class="heart-float heart-float-one" aria-hidden="true">♥</span>
-            <div class="cat-scene cat-scene-hero">
-              <span class="cat-shadow" aria-hidden="true"></span>
-              <img class="character-image character-image-hero" src="assets/characters/anh-nam-cutout.png" alt="Anh cầm hoa và hộp quà trong không gian hồng" />
-              <div class="flower-bundle" aria-hidden="true">
-                <span class="flower flower-one">✿</span>
-                <span class="flower flower-two">✿</span>
-                <span class="flower flower-three">✿</span>
-                <span class="flower-stem"></span>
-              </div>
-            </div>
+          <div class="hero-art archive-collage">
+            <figure class="hero-polaroid">
+              <img src="assets/memories/12-bau-troi-cua-doi-minh.jpg" alt="Hai người chụp ảnh cùng nhau dưới bầu trời xanh" fetchpriority="high" />
+              <figcaption>Một bầu trời có đôi mình ♡</figcaption>
+            </figure>
+            <img class="archive-character-stamp" src="assets/characters/hai-nguoi.png" alt="Hai người bên nhau trong lời chúc 20/10" />
+            <span class="collage-stamp" aria-hidden="true">♥</span>
+            <p class="collage-note">Cùng nhau,<br />vẫn còn nhiều<br />chuyện để nhớ...<span aria-hidden="true">♡</span></p>
+            <p class="anniversary-note"><strong>20/10</strong>Ngày của em<br />và những điều<br />đẹp nhất <span aria-hidden="true">♡</span></p>
           </div>
         </section>
 
-        <section class="mission-section section-wrap" id="mission" aria-labelledby="mission-title" hidden>
-          <div class="section-heading">
-            <p class="eyebrow"><span aria-hidden="true">♡</span> Nhiệm vụ hôm nay</p>
-            <h2 id="mission-title">Làm em mỉm cười</h2>
-            <p>
-              Mỗi điều nhỏ bên dưới là một lý do anh thấy may mắn vì có em trong cuộc đời.
-            </p>
-          </div>
-
-          <div class="progress-card" aria-label="Tiến trình nhiệm vụ">
-            <div class="progress-label-row">
-              <span id="progress-label">Đã mở 0/3 hộp quà</span>
-              <span id="progress-percent">0%</span>
-            </div>
-            <div class="progress-track" aria-hidden="true">
-              <span class="progress-fill" id="gift-progress-fill"></span>
-            </div>
-            <p class="live-status" id="live-status" aria-live="polite">Miu Miu đang đợi em đó.</p>
-          </div>
-
-          <div class="gift-grid" aria-label="Các hộp quà nhỏ">
-            <article class="gift-card" data-gift-card="compliment">
-              <div class="gift-card-icon" data-gift-icon="✿" aria-hidden="true">
-                <svg class="gift-card-svg" viewBox="0 0 24 24" focusable="false">
-                  <circle cx="12" cy="9" r="2.2"></circle>
-                  <path d="M12 6.8C10.9 4.3 8 3.5 6.8 5.2c-1.1 1.7.2 3.8 3.1 4.4M12 6.8c1.1-2.5 4-3.3 5.2-1.6 1.1 1.7-.2 3.8-3.1 4.4M12 11.2v6.3M9.4 19h5.2"></path>
-                </svg>
-              </div>
-              <p class="card-kicker">Hộp số 01</p>
-              <h3>Điều anh thích ở em</h3>
-              <p class="gift-message">Cách em luôn quan tâm đến những điều rất nhỏ.</p>
-              <button class="button button-card gift-button" type="button" data-gift-id="compliment">
-                Mở hộp <span aria-hidden="true">↗</span>
-              </button>
-            </article>
-            <article class="gift-card" data-gift-card="memory">
-              <div class="gift-card-icon" data-gift-icon="▧" aria-hidden="true">
-                <svg class="gift-card-svg" viewBox="0 0 24 24" focusable="false">
-                  <rect x="3.2" y="5.4" width="17.6" height="13.2" rx="2"></rect>
-                  <path d="m8 5.4 1.2-2h5.6l1.2 2"></path>
-                  <circle cx="12" cy="12" r="3.1"></circle>
-                </svg>
-              </div>
-              <p class="card-kicker">Hộp số 02</p>
-              <h3>Kỷ niệm anh nhớ</h3>
-              <p class="gift-message">Những ngày bình thường nhưng chỉ cần có em là đã vui.</p>
-              <button class="button button-card gift-button" type="button" data-gift-id="memory">
-                Mở hộp <span aria-hidden="true">↗</span>
-              </button>
-            </article>
-            <article class="gift-card" data-gift-card="thanks">
-              <div class="gift-card-icon thanks-envelope" data-gift-icon="✉" aria-hidden="true">
-                <svg class="thanks-envelope-svg" viewBox="0 0 64 56" focusable="false">
-                  <rect class="thanks-envelope-body" x="7" y="17" width="50" height="31" rx="4"></rect>
-                  <g class="thanks-envelope-letter">
-                    <rect x="17" y="8" width="30" height="29" rx="2"></rect>
-                    <path d="M22 17h20M22 23h14"></path>
-                  </g>
-                  <path class="thanks-envelope-flap" d="M8 18 32 36 56 18Z"></path>
-                  <path class="thanks-envelope-fold" d="m8 47 18-15M56 47 38 32"></path>
-                </svg>
-              </div>
-              <p class="card-kicker">Hộp số 03</p>
-              <h3>Lời anh muốn cảm ơn</h3>
-              <p class="gift-message">Cảm ơn em vì đã cùng anh đi qua cả những ngày không dễ dàng.</p>
-              <p class="gift-open-message" hidden>Gửi vợ yêu của anh,
-
-Có thể anh không phải người giỏi nói những lời ngọt ngào, cũng không phải lúc nào cũng hiểu hết những điều em nghĩ.
-
-Nhưng anh luôn biết mình may mắn thế nào khi có em bên cạnh.
-
-Cảm ơn em vì đã chọn anh, vì những yêu thương và cả những hy sinh thầm lặng.
-
-Ngày 20/10, anh chỉ muốn nói rằng: Anh thương em rất nhiều, và anh sẽ cố gắng trở thành người chồng tốt hơn mỗi ngày. ❤️</p>
-              <button class="button button-card gift-button" type="button" data-gift-id="thanks">
-                Mở thư
-              </button>
-            </article>
-          </div>
-        </section>
-
-        <section class="memory-section section-wrap" aria-labelledby="memory-title" hidden>
+        <section class="memory-section archive-section section-wrap" id="memory-archive" aria-labelledby="memory-title">
           <div class="section-heading section-heading-inline">
             <div>
               <p class="eyebrow"><span aria-hidden="true">✦</span> Góc kỷ niệm</p>
-              <h2 id="memory-title">Bằng chứng em rất đáng yêu</h2>
+              <h2 id="memory-title">12 kỷ niệm được lưu lại</h2>
             </div>
             <p class="section-aside">
-              Lướt xuống để xem từng kỷ niệm. Chạm vào ảnh nếu em muốn mở chi tiết.
-              <span id="memory-progress">Đã xem 0/12 ảnh</span>
+              Những mảnh ghép nhỏ tạo nên câu chuyện của chúng mình…
+              <span class="sr-only">Lướt xuống để xem từng mảnh ghép. Chạm vào ảnh nếu em muốn mở chi tiết.</span>
             </p>
           </div>
 
@@ -289,89 +212,58 @@ Ngày 20/10, anh chỉ muốn nói rằng: Anh thương em rất nhiều, và an
           </div>
         </section>
 
-        <section class="heart-section section-wrap" aria-labelledby="heart-title" hidden>
-          <div class="heart-copy">
-            <p class="eyebrow"><span aria-hidden="true">♥</span> Thu thập yêu thương</p>
-            <h2 id="heart-title">Giúp Miu Miu gom đủ yêu thương cho em</h2>
-            <p>
-              Chọn bất kỳ trái tim nào trong vườn. Gom đủ 5 trái tim là hoàn thành nhiệm vụ.
-            </p>
-          </div>
-          <div class="heart-game" id="heart-game" aria-label="Trò chơi thu thập năm trái tim">
-            <span class="heart-orbit orbit-one" aria-hidden="true"></span>
-            <span class="heart-orbit orbit-two" aria-hidden="true"></span>
-            <button class="heart-button" type="button" data-heart-id="heart-1" aria-label="Thu thập trái tim 1">♥</button>
-            <button class="heart-button" type="button" data-heart-id="heart-2" aria-label="Thu thập trái tim 2">♥</button>
-            <button class="heart-button" type="button" data-heart-id="heart-3" aria-label="Thu thập trái tim 3">♥</button>
-            <button class="heart-button" type="button" data-heart-id="heart-4" aria-label="Thu thập trái tim 4">♥</button>
-            <button class="heart-button" type="button" data-heart-id="heart-5" aria-label="Thu thập trái tim 5">♥</button>
-            <div class="heart-cat-note">
-              <span class="mini-cat" aria-hidden="true">🐱</span>
-              <span id="heart-message">Miu Miu đang chờ em chọn một trái tim bất kỳ!</span>
-            </div>
-          </div>
-          <div class="heart-meter" aria-live="polite">
-            <span id="heart-count-label">0/5 trái tim</span>
-            <span class="heart-row" aria-hidden="true" id="heart-row">♡ ♡ ♡ ♡ ♡</span>
-          </div>
-        </section>
-
-        <section class="final-section section-wrap" id="final-gift" aria-labelledby="final-title" hidden>
-          <div class="final-card">
-            <div class="final-cat" id="final-character-frame" aria-label="Anh cầm hoa và hộp quà trong không gian hồng">
-              <img class="final-character-image" id="final-character-image" src="assets/characters/anh-nam-cutout.png" alt="Anh cầm hoa và hộp quà trong không gian hồng" />
+        <section class="final-section letter-section section-wrap" id="final-letter" aria-labelledby="final-title">
+          <div class="final-card letter-card">
+            <div class="letter-envelope" id="letter-envelope" aria-label="Phong thư đang khép">
+              <svg class="letter-envelope-svg" viewBox="0 0 320 220" aria-hidden="true" focusable="false">
+                <rect class="letter-envelope-body" x="20" y="50" width="280" height="145" rx="18"></rect>
+                <rect class="letter-paper" x="66" y="22" width="188" height="130" rx="8"></rect>
+                <path class="letter-paper-lines" d="M92 65h136M92 88h112M92 111h84"></path>
+                <path class="letter-envelope-front" d="M20 53 160 145 300 53V177q0 18-18 18H38q-18 0-18-18Z"></path>
+                <path class="letter-envelope-fold" d="m22 58 138 103L298 58M22 190l98-78M298 190l-98-78"></path>
+                <path class="letter-envelope-flap" d="M21 53 160 145 299 53Z"></path>
+                <circle class="letter-seal" cx="160" cy="145" r="16"></circle>
+                <path class="letter-seal-mark" d="m152 144 6 6 11-13"></path>
+              </svg>
             </div>
             <div class="final-copy">
-              <p class="eyebrow"><span aria-hidden="true">✧</span> Món quà cuối cùng</p>
-              <h2 id="final-title">Chưa mở được đâu...</h2>
-              <p id="final-description">Em hãy thu thập đủ năm trái tim để Miu Miu mở chiếc hộp này nhé.</p>
-              <button class="button button-primary final-gift-button" id="final-gift-button" type="button" disabled>
-                Xem lời chúc cuối cùng
-                <svg class="final-gift-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <rect x="4" y="9" width="16" height="11" rx="1.5"></rect>
-                  <path d="M3 9h18v4H3zM12 9v11M12 9H9.5c-2.2 0-3.5-1-3.5-2.3S7.2 5 9 5c1.5 0 2.7 1.9 3 4Zm0 0h2.5c2.2 0 3.5-1 3.5-2.3S16.8 5 15 5c-1.5 0-2.7 1.9-3 4Z"></path>
-                </svg>
+              <p class="eyebrow">Gửi người anh thương ♡</p>
+              <h2 id="final-title">Một lá thư để dành <span aria-hidden="true">♡</span></h2>
+              <p id="final-description">Có những lời bây giờ mới dám viết…<br />Mở ra nhé, để biết anh luôn trân trọng em nhiều đến nhường nào.</p>
+              <button class="button button-primary final-gift-button" id="final-gift-button" type="button" aria-controls="letter-modal" aria-expanded="false" aria-haspopup="dialog">
+                Mở lá thư <span aria-hidden="true">↗</span>
               </button>
-            </div>
-          </div>
-          <div class="final-message" id="final-message" hidden>
-            <span class="final-badge" aria-hidden="true">♥</span>
-            <p class="eyebrow">Nhiệm vụ hoàn thành</p>
-            <h2>Chúc mừng 20/10, cô gái đáng yêu của anh!</h2>
-            <p>
-              Cảm ơn em vì đã xuất hiện trong cuộc đời anh, làm những ngày bình thường trở nên vui hơn
-              và biến một nơi nào đó thành nhà.
-            </p>
-            <div class="confetti" aria-hidden="true">
-              <span>♥</span><span>✦</span><span>♥</span><span>✿</span><span>✧</span><span>♥</span>
             </div>
           </div>
         </section>
       </main>
 
-      <footer class="site-footer" id="site-footer" hidden>
-        <span>Miu Miu đã hoàn thành nhiệm vụ.</span>
-        <span aria-hidden="true">♥</span>
+      <footer class="site-footer" id="site-footer">
+        <a href="more-memories.html">Mở kho ảnh bổ sung <span aria-hidden="true">→</span></a>
+        <span>Mỗi khoảnh khắc đều đáng được lưu lại. <span aria-hidden="true">♥</span></span>
       </footer>
     </div>
 
-    <dialog class="message-modal" id="message-modal" aria-labelledby="message-modal-title" aria-describedby="message-modal-body">
-      <div class="message-modal-card">
-        <button class="message-modal-close" id="message-modal-close" type="button" aria-label="Đóng lời nhắn">×</button>
-        <span class="message-modal-icon" id="message-modal-icon" aria-hidden="true">♥</span>
-        <p class="eyebrow" id="message-modal-kicker">Miu Miu gửi lời yêu</p>
-        <h2 id="message-modal-title">Một lời nhắn nhỏ dành cho em</h2>
-        <p class="message-modal-body" id="message-modal-body">Miu Miu đang chuẩn bị một điều thật dễ thương.</p>
-        <button class="button button-primary" id="message-modal-action" type="button">Tiếp tục</button>
+    <dialog class="letter-modal" id="letter-modal" aria-labelledby="letter-modal-title">
+      <h2 class="sr-only" id="letter-modal-title">Một lá thư để dành</h2>
+      <button class="letter-modal-close" id="letter-modal-close" type="button" aria-label="Đóng lá thư" autofocus>×</button>
+      <p class="sr-only" id="letter-modal-status" role="status"></p>
+      <div class="letter-animation-stage" id="letter-animation-stage" aria-hidden="true"></div>
+      <div class="final-message letter-reading-panel" id="final-message" tabindex="-1" hidden>
+        <span class="final-badge" aria-hidden="true">♥</span>
+        <p class="eyebrow">Gửi vợ yêu của anh,</p>
+        <h2>Lời anh muốn nói sau cùng</h2>
+        <p>Có thể anh không phải người giỏi nói những lời ngọt ngào, cũng không phải lúc nào cũng hiểu hết những điều em nghĩ.</p>
+        <p>Nhưng anh luôn biết mình may mắn thế nào khi có em bên cạnh.</p>
+        <p>Cảm ơn em vì đã chọn anh, vì những yêu thương và cả những hy sinh thầm lặng.</p>
+        <p>Ngày 20/10, anh chỉ muốn nói rằng: <strong>Anh thương em rất nhiều, và anh sẽ cố gắng trở thành người chồng tốt hơn mỗi ngày.</strong> ❤️</p>
       </div>
     </dialog>
 
     <dialog class="photo-modal" id="photo-modal" aria-labelledby="photo-modal-title" aria-describedby="photo-modal-caption">
       <div class="photo-modal-card">
         <button class="message-modal-close" id="photo-modal-close" type="button" aria-label="Đóng ảnh">×</button>
-        <div class="photo-modal-image-wrap">
-          <img id="photo-modal-image" src="" alt="" />
-        </div>
+        <div class="photo-modal-image-wrap"><img id="photo-modal-image" src="" alt="" /></div>
         <div class="photo-modal-copy">
           <p class="eyebrow" id="photo-modal-counter">Ảnh 1/12</p>
           <h2 id="photo-modal-title">Một khoảnh khắc của đôi mình</h2>

@@ -2,270 +2,103 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
-  collectHeart,
-  createModalContent,
-  createInitialState,
-  getAdjacentPhotoIndex,
   formatPhotoCounter,
-  getFinalImageContent,
-  getJourneyStep,
-  isMemoryComplete,
-  isFinalGiftUnlocked,
-  openGift,
-  openFinalGift,
-  viewPhoto,
+  getAdjacentPhotoIndex,
 } from '../src/interaction-state.mjs';
 
 const indexMarkup = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const appMarkup = readFileSync(new URL('../app.js', import.meta.url), 'utf8');
+const moreMemoriesMarkup = readFileSync(new URL('../more-memories.html', import.meta.url), 'utf8');
+const moreMemoriesAppMarkup = readFileSync(new URL('../more-memories.js', import.meta.url), 'utf8');
+const extraMemoriesManifest = readFileSync(new URL('../assets/memories-extra/manifest.js', import.meta.url), 'utf8');
 const stylesMarkup = readFileSync(new URL('../styles.css', import.meta.url), 'utf8');
 
 test('publishes the selected social preview metadata', () => {
   assert.match(indexMarkup, /<meta property="og:type" content="website" \/>/);
-  assert.match(indexMarkup, /<meta property="og:title" content="Miu Miu gửi lời yêu \| Chúc mừng 20\/10" \/>/);
-  assert.match(indexMarkup, /<meta property="og:url" content="https:\/\/kintinz\.github\.io\/miu-miu-20-10\/" \/>/);
-  assert.match(indexMarkup, /<meta\s+property="og:image"/);
   assert.match(indexMarkup, /content="https:\/\/kintinz\.github\.io\/miu-miu-20-10\/assets\/social-preview\.png"/);
-  assert.match(indexMarkup, /<meta property="og:image:width" content="1479" \/>/);
-  assert.match(indexMarkup, /<meta property="og:image:height" content="826" \/>/);
   assert.match(indexMarkup, /<meta name="twitter:card" content="summary_large_image" \/>/);
-  assert.match(indexMarkup, /<meta\s+name="twitter:image"/);
-  assert.match(indexMarkup, /content="https:\/\/kintinz\.github\.io\/miu-miu-20-10\/assets\/social-preview\.png"/);
 });
 
-test('uses simple line icons for gift cards and the final gift button', () => {
-  const giftCardIcons = [...indexMarkup.matchAll(/<div class="gift-card-icon\b[\s\S]*?<\/div>/g)];
-  const finalGiftButton = indexMarkup.match(/<button[^>]*id="final-gift-button"[\s\S]*?<\/button>/);
-
-  assert.equal(giftCardIcons.length, 3);
-  giftCardIcons.forEach(([markup]) => {
-    assert.match(markup, /<svg\b/);
-    assert.doesNotMatch(markup, /🌷|📸|💌/);
-  });
-  assert.ok(finalGiftButton);
-  assert.match(finalGiftButton[0], /final-gift-icon/);
-  assert.doesNotMatch(finalGiftButton[0], /🎁/);
+test('renders the public page as a directly visible memory archive', () => {
+  assert.match(indexMarkup, />\s*Kho lưu trữ kỷ niệm\s*</);
+  assert.match(indexMarkup, />\s*Những ngày mình đã đi qua\s*</);
+  assert.match(indexMarkup, />\s*12 kỷ niệm được lưu lại\s*</);
+  assert.match(indexMarkup, /<section class="memory-section archive-section section-wrap"[^>]*aria-labelledby="memory-title"[^>]*>/);
+  assert.doesNotMatch(indexMarkup, /class="mission-section/);
+  assert.doesNotMatch(indexMarkup, /class="heart-section/);
+  assert.equal([...indexMarkup.matchAll(/data-photo-index="\d+"/g)].length, 12);
 });
 
-test('uses transparent cutout assets for the separate male and female characters', () => {
-  assert.match(indexMarkup, /assets\/characters\/anh-nam-cutout\.png/);
+test('keeps the couple and separate character assets available', () => {
+  assert.match(indexMarkup, /assets\/characters\/hai-nguoi\.png/);
   assert.match(indexMarkup, /assets\/characters\/anh-nu-cutout\.png/);
 });
 
-test('models the thank-you card as an envelope with a letter to reveal', () => {
-  const thanksCard = indexMarkup.match(/<article class="gift-card" data-gift-card="thanks">[\s\S]*?<\/article>/);
-
-  assert.ok(thanksCard);
-  assert.match(thanksCard[0], /thanks-envelope/);
-  assert.match(thanksCard[0], /class="thanks-envelope-flap"/);
-  assert.match(thanksCard[0], /class="thanks-envelope-letter"/);
-  assert.match(thanksCard[0], />\s*Mở thư\s*</);
-});
-
-test('uses the full final letter message when the thank-you gift opens', () => {
-  const thanksCard = indexMarkup.match(/<article class="gift-card" data-gift-card="thanks">[\s\S]*?<\/article>/);
-
-  assert.ok(thanksCard);
-  assert.match(thanksCard[0], /class="gift-open-message"/);
-  assert.match(thanksCard[0], /Gửi vợ yêu của anh/);
-  assert.match(thanksCard[0], /Anh thương em rất nhiều, và anh sẽ cố gắng trở thành người chồng tốt hơn mỗi ngày/);
-  assert.match(appMarkup, /gift-open-message/);
-  assert.match(
-    stylesMarkup,
-    /\.message-modal-body\s*\{[\s\S]*?white-space:\s*pre-line;/,
-  );
-});
-
-test('labels the final action as viewing the last wish without the helper sentence', () => {
-  const finalSection = indexMarkup.match(/<section class="final-section[\s\S]*?<\/section>/);
-  const finalButton = indexMarkup.match(/<button[^>]*id="final-gift-button"[\s\S]*?<\/button>/);
-
-  assert.ok(finalSection);
-  assert.match(finalSection[0], /\shidden>/);
-  assert.ok(finalButton);
-  assert.match(finalButton[0], />\s*Xem lời chúc cuối cùng\s*/);
-  assert.doesNotMatch(appMarkup, /Đủ yêu thương rồi\. Em bấm mở chiếc hộp cuối cùng nhé\./);
-});
-
-test('keeps the final completion message free of the real-gift invitation', () => {
-  assert.doesNotMatch(indexMarkup, /Món quà thật của em đang chờ ở ngoài đời\. Tối nay nhớ để dành bụng nhé\./);
-});
-
-test('uses a polished responsive scrollbar for the page and final message popup', () => {
-  assert.match(stylesMarkup, /html::-webkit-scrollbar\s*\{/);
-  assert.match(stylesMarkup, /html::-webkit-scrollbar-thumb\s*\{/);
-  assert.match(
-    stylesMarkup,
-    /\.message-modal\s*\{[\s\S]*?max-height:\s*min\(calc\(100dvh - 24px\), 760px\);[\s\S]*?overflow-y:\s*auto;/,
-  );
-  assert.match(stylesMarkup, /\.message-modal::-webkit-scrollbar-thumb\s*\{/);
-  assert.match(stylesMarkup, /\.message-modal\s*\{[\s\S]*?scrollbar-width:\s*thin;/);
-});
-
-test('keeps the final image uncropped and lets the thank-you envelope animate before its popup', () => {
-  assert.doesNotMatch(
-    stylesMarkup,
-    /\.final-section\.is-complete\s+\.final-character-image[\s\S]*?object-fit:\s*cover;/,
-  );
-
-  const giftHandler = appMarkup.match(
-    /function handleGiftClick\(event\) \{[\s\S]*?\n\}\n\nfunction handleHeartClick/,
-  );
-
-  assert.ok(giftHandler);
-  assert.match(giftHandler[0], /giftId === 'thanks'/);
-  assert.match(giftHandler[0], /setTimeout/);
-  assert.match(giftHandler[0], /720/);
-});
-
-test('gives the memory heading enough horizontal space beside its aside', () => {
-  assert.match(
-    stylesMarkup,
-    /\.section-heading-inline\s*\{[\s\S]*?max-width:\s*none;/,
-  );
-  assert.match(
-    stylesMarkup,
-    /\.section-heading-inline\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(220px,\s*250px\);/,
-  );
-});
-
-test('reveals memory photos from scrolling instead of counting photo clicks', () => {
-  assert.match(indexMarkup, /Lướt xuống để xem từng kỷ niệm/);
-  assert.doesNotMatch(indexMarkup, /Bấm vào từng tấm ảnh để Miu Miu kể lại/);
+test('keeps the 12 memory cards as scroll-revealed cards without click counting', () => {
+  assert.match(indexMarkup, /Lướt xuống để xem từng mảnh ghép/);
   assert.match(appMarkup, /new IntersectionObserver\(/);
   assert.match(appMarkup, /memoryCards\.forEach\(\(card\) => memoryObserver\.observe\(card\)\)/);
+  assert.doesNotMatch(appMarkup, /recordViewedPhoto|viewPhoto\(/);
+  assert.doesNotMatch(appMarkup, /missionState|getJourneyStep|unlockNextJourneySection/);
+});
 
-  const photoClickHandler = appMarkup.match(
-    /elements\.photoButtons\.forEach\(\(button\) => \{[\s\S]*?\n\}\);/,
-  );
-
-  assert.ok(photoClickHandler);
-  assert.doesNotMatch(photoClickHandler[0], /recordViewedPhoto/);
-  assert.match(photoClickHandler[0], /openPhotoModal\(photoIndex\)/);
-  assert.doesNotMatch(
-    appMarkup.match(/function movePhoto\([\s\S]*?\n\}/)?.[0] ?? '',
-    /recordViewedPhoto/,
-  );
+test('provides a separate empty-ready page for future memory uploads', () => {
+  assert.match(indexMarkup, /href="more-memories\.html"/);
+  assert.match(moreMemoriesMarkup, /Kho ảnh bổ sung/);
+  assert.match(moreMemoriesMarkup, /id="extra-memory-grid"/);
+  assert.match(moreMemoriesMarkup, /id="extra-memory-empty"/);
+  assert.match(moreMemoriesMarkup, /src="\.\/more-memories\.js"/);
+  assert.match(moreMemoriesAppMarkup, /import { extraMemories } from '\.\/assets\/memories-extra\/manifest\.js';/);
+  assert.match(moreMemoriesAppMarkup, /extraMemories\.length/);
+  assert.match(extraMemoriesManifest, /export const extraMemories = \[\];/);
 });
 
 test('keeps separate mobile and desktop memory layouts', () => {
-  assert.match(
-    stylesMarkup,
-    /@media\s*\(max-width:\s*859px\)[\s\S]*?\.memory-grid\s*\{[\s\S]*?grid-template-columns:\s*1fr;/,
-  );
-  assert.match(
-    stylesMarkup,
-    /@media\s*\(min-width:\s*860px\)[\s\S]*?\.section-heading-inline\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(220px,\s*250px\);/,
-  );
+  assert.match(stylesMarkup, /@media\s*\(max-width:\s*859px\)[\s\S]*?\.memory-grid\s*\{[\s\S]*?grid-template-columns:\s*1fr;/);
+  assert.match(stylesMarkup, /\.scrapbook-page \.memory-grid\s*\{[^}]*grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\);/);
+  assert.match(stylesMarkup, /@media\s*\(max-width:\s*859px\)[\s\S]*?\.scrapbook-page \.memory-grid\s*\{[^}]*grid-template-columns:\s*1fr;/);
 });
 
-test('creates a closed mission with configured gift, photo, and heart counts', () => {
-  const state = createInitialState(3, 5, 12);
-
-  assert.deepEqual(state, {
-    openedGifts: [],
-    viewedPhotos: [],
-    collectedHearts: [],
-    giftCount: 3,
-    photoCount: 12,
-    heartCount: 5,
-    finalGiftOpened: false,
-  });
-});
-
-test('renders a non-interactive music indicator with flying notes and fallback autoplay', () => {
-  assert.match(indexMarkup, /id="music-indicator"/);
-  assert.doesNotMatch(indexMarkup, /id="music-toggle"/);
+test('renders the music disc with flying notes and autoplay fallback', () => {
+  assert.match(indexMarkup, /id="background-audio" autoplay/);
   assert.equal([...indexMarkup.matchAll(/class="music-note\b/g)].length, 3);
-  assert.match(indexMarkup, /aria-label="Nhạc nền đang phát"/);
-  assert.match(stylesMarkup, /\.music-note[\s\S]*?opacity:\s*0;/);
   assert.match(stylesMarkup, /@keyframes music-note-float/);
-  assert.doesNotMatch(appMarkup, /getMusicToggleContent/);
-  assert.doesNotMatch(appMarkup, /handleMusicToggle/);
-  assert.doesNotMatch(appMarkup, /elements\.musicToggle\.addEventListener/);
-  assert.match(appMarkup, /pointerdown/);
+  assert.match(appMarkup, /document\.addEventListener\('pointerdown', startMusicAfterFirstInteraction/);
 });
 
-test('selects the man image before completion and the couple image after opening the final gift', () => {
-  assert.deepEqual(getFinalImageContent(false), {
-    src: 'assets/characters/anh-nam-cutout.png',
-    alt: 'Anh cầm hoa và hộp quà trong không gian hồng',
-  });
-
-  assert.deepEqual(getFinalImageContent(true), {
-    src: 'assets/characters/hai-nguoi.png',
-    alt: 'Hai người bên nhau trong lời chúc 20/10',
-  });
+test('exposes a selectable playlist without a music-off control', () => {
+  assert.match(indexMarkup, /id="music-indicator"[^>]*aria-controls="music-playlist"/);
+  assert.match(indexMarkup, /id="music-playlist"/);
+  assert.match(indexMarkup, /assets\/audio\/cham-em-mot-doi\.mp3/);
+  assert.match(indexMarkup, /data-track-index="0"[^>]*aria-current="true"/);
+  assert.match(indexMarkup, /id="music-previous"/);
+  assert.match(indexMarkup, /id="music-next"/);
+  assert.doesNotMatch(indexMarkup, /id="music-toggle"/);
+  assert.match(appMarkup, /const playlist = \[/);
+  assert.match(appMarkup, /handleTrackSelect/);
 });
 
-test('opening the same gift twice only counts it once', () => {
-  const initialState = createInitialState();
-  const openedOnce = openGift(initialState, 'compliment');
-  const openedTwice = openGift(openedOnce, 'compliment');
-
-  assert.deepEqual(openedOnce.openedGifts, ['compliment']);
-  assert.deepEqual(openedTwice.openedGifts, ['compliment']);
-  assert.deepEqual(initialState.openedGifts, []);
+test('renders the final wish as a directly accessible envelope letter', () => {
+  assert.match(indexMarkup, /id="final-letter"/);
+  assert.doesNotMatch(indexMarkup, /id="final-letter"[^>]*\shidden/);
+  assert.match(indexMarkup, /class="letter-envelope-flap"/);
+  assert.match(indexMarkup, /class="letter-paper"/);
+  assert.match(indexMarkup, /id="final-gift-button"[^>]*aria-controls="letter-modal"[^>]*aria-expanded="false"[^>]*>[\s\S]*Mở lá thư/);
+  assert.match(indexMarkup, /Anh thương em rất nhiều, và anh sẽ cố gắng trở thành người chồng tốt hơn mỗi ngày/);
+  assert.doesNotMatch(indexMarkup, /Món quà thật của em đang chờ ở ngoài đời/);
+  assert.match(indexMarkup, /<dialog[^>]*id="letter-modal"/);
+  assert.match(indexMarkup, /id="letter-modal-close"/);
+  assert.match(appMarkup, /finalButton\.setAttribute\('aria-expanded', 'true'\)/);
+  assert.doesNotMatch(appMarkup, /finalButton\.disabled = true/);
+  assert.match(stylesMarkup, /\.letter-envelope\.is-open \.letter-paper/);
 });
 
-test('viewing the same memory photo twice only counts it once', () => {
-  const initialState = createInitialState(3, 5, 2);
-  const viewedOnce = viewPhoto(initialState, 'photo-1');
-  const viewedTwice = viewPhoto(viewedOnce, 'photo-1');
-
-  assert.deepEqual(viewedOnce.viewedPhotos, ['photo-1']);
-  assert.deepEqual(viewedTwice.viewedPhotos, ['photo-1']);
-  assert.deepEqual(initialState.viewedPhotos, []);
-});
-
-test('memory section unlocks only after every configured photo is viewed', () => {
-  let state = createInitialState(3, 5, 2);
-
-  assert.equal(isMemoryComplete(state), false);
-  state = viewPhoto(state, 'photo-1');
-  assert.equal(isMemoryComplete(state), false);
-  state = viewPhoto(state, 'photo-2');
-  assert.equal(isMemoryComplete(state), true);
-});
-
-test('journey advances one section at a time', () => {
-  let state = createInitialState(2, 2, 2);
-
-  assert.equal(getJourneyStep(state), 'mission');
-  state = openGift(state, 'gift-1');
-  state = openGift(state, 'gift-2');
-  assert.equal(getJourneyStep(state), 'memory');
-  state = viewPhoto(state, 'photo-1');
-  state = viewPhoto(state, 'photo-2');
-  assert.equal(getJourneyStep(state), 'hearts');
-  state = collectHeart(state, 'heart-1');
-  state = collectHeart(state, 'heart-2');
-  assert.equal(getJourneyStep(state), 'final');
-  state = openFinalGift(state);
-  assert.equal(getJourneyStep(state), 'complete');
-});
-
-test('collecting the same heart twice only counts it once', () => {
-  const initialState = createInitialState();
-  const collectedOnce = collectHeart(initialState, 'heart-1');
-  const collectedTwice = collectHeart(collectedOnce, 'heart-1');
-
-  assert.deepEqual(collectedOnce.collectedHearts, ['heart-1']);
-  assert.deepEqual(collectedTwice.collectedHearts, ['heart-1']);
-  assert.deepEqual(initialState.collectedHearts, []);
-});
-
-test('lets the heart garden accept any heart without a hinted target', () => {
-  assert.match(indexMarkup, /Chọn bất kỳ trái tim nào/);
-  assert.doesNotMatch(appMarkup, /startHeartHints|showNextHeartHint|is-hinted/);
-  assert.doesNotMatch(stylesMarkup, /\.heart-button\.is-hinted|heart-hint/);
-
-  let state = createInitialState(3, 5, 12);
-  for (const heartId of ['heart-5', 'heart-2', 'heart-4', 'heart-1', 'heart-3']) {
-    state = collectHeart(state, heartId);
-  }
-
-  assert.equal(isFinalGiftUnlocked(state), true);
+test('keeps the photo lightbox controls and responsive scrollbar styling', () => {
+  assert.match(indexMarkup, /id="photo-modal"/);
+  assert.match(indexMarkup, /id="photo-modal-previous"/);
+  assert.match(indexMarkup, /id="photo-modal-next"/);
+  assert.match(stylesMarkup, /html::-webkit-scrollbar\s*\{/);
+  assert.match(stylesMarkup, /html::-webkit-scrollbar-thumb\s*\{/);
 });
 
 test('wraps photo navigation from the first photo to the last photo', () => {
@@ -281,44 +114,7 @@ test('moves one position when photo navigation stays within the gallery', () => 
   assert.equal(getAdjacentPhotoIndex(2, 6, -1), 1);
 });
 
-test('formats the photo counter for an expanded gallery', () => {
+test('formats the photo counter for the 12-photo archive', () => {
   assert.equal(formatPhotoCounter(0, 12), 'Ảnh 1/12');
   assert.equal(formatPhotoCounter(11, 12), 'Ảnh 12/12');
-});
-
-test('creates the correct popup framing for each interaction type', () => {
-  assert.deepEqual(createModalContent('gift', {
-    icon: '🌷',
-    title: 'Điều anh thích ở em',
-    body: 'Cách em luôn quan tâm đến những điều rất nhỏ.',
-  }), {
-    icon: '🌷',
-    kicker: 'Miu Miu mở một hộp quà',
-    title: 'Điều anh thích ở em',
-    body: 'Cách em luôn quan tâm đến những điều rất nhỏ.',
-    actionLabel: 'Tiếp tục',
-  });
-
-  assert.equal(createModalContent('heart', {
-    icon: '♥',
-    title: 'Một điều anh muốn nói',
-    body: 'Em rất quan trọng với anh.',
-  }).actionLabel, 'Tìm tiếp');
-
-  assert.equal(createModalContent('final', {
-    icon: '🎁',
-    title: 'Chúc mừng 20/10',
-    body: 'Cảm ơn em.',
-  }).kicker, 'Nhiệm vụ hoàn thành');
-
-});
-
-test('final gift unlocks only after all configured hearts are collected', () => {
-  let state = createInitialState(3, 2);
-
-  assert.equal(isFinalGiftUnlocked(state), false);
-  state = collectHeart(state, 'heart-1');
-  assert.equal(isFinalGiftUnlocked(state), false);
-  state = collectHeart(state, 'heart-2');
-  assert.equal(isFinalGiftUnlocked(state), true);
 });

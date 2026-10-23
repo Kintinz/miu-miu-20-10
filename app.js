@@ -1,57 +1,34 @@
-import {
-  collectHeart,
-  createModalContent,
-  createInitialState,
-  getAdjacentPhotoIndex,
-  getFinalImageContent,
-  getJourneyStep,
-  formatPhotoCounter,
-  isMemoryComplete,
-  isFinalGiftUnlocked,
-  openGift,
-  openFinalGift,
-  viewPhoto,
-} from './src/interaction-state.js';
+import { formatPhotoCounter, getAdjacentPhotoIndex } from './src/interaction-state.js';
 
-const giftCount = 3;
-const heartCount = 5;
-const photoCount = 12;
-let missionState = createInitialState(giftCount, heartCount, photoCount);
-let pendingJourneyScroll = null;
-let memoryObserver = null;
+const memoryPhotos = [
+  { src: 'assets/memories/01-non-la.jpg', alt: 'Cô ấy đội nón lá giữa khung cảnh núi xanh', title: 'Một chuyến đi có em', caption: 'Đi đâu cũng thành một chuyến đi đáng nhớ khi có em.' },
+  { src: 'assets/memories/02-le-thanh-hon.png', alt: 'Hai người đứng cạnh nhau trong ngày lễ thành hôn', title: 'Ngày mình về chung một nhà', caption: 'Một ngày thật đẹp, nơi câu chuyện của mình bước sang trang mới.' },
+  { src: 'assets/memories/03-selfie-dem.jpg', alt: 'Hai người chụp selfie buổi tối bên những tòa tháp ánh sáng', title: 'Một buổi tối rất vui', caption: 'Chỉ cần đứng cạnh nhau, một buổi tối bình thường cũng đủ ấm áp.' },
+  { src: 'assets/memories/04-cung-tren-may-bay.jpg', alt: 'Hai người ngồi cạnh nhau trên máy bay', title: 'Cùng nhau đi thật xa', caption: 'Có những chuyến bay ngắn nhưng lại mang theo rất nhiều kỷ niệm.' },
+  { src: 'assets/memories/05-anh-cuoi.jpg', alt: 'Hai người trong trang phục cưới giữa không gian hoa trắng', title: 'Ngày hạnh phúc của mình', caption: 'Anh muốn giữ nụ cười này thật lâu, thật lâu nữa.' },
+  { src: 'assets/memories/06-co-ay-ao-do.jpg', alt: 'Cô ấy mặc áo đỏ giữa những lá cờ Việt Nam', title: 'Cô gái anh thương nhất', caption: 'Dù em mặc màu gì, trong mắt anh em vẫn luôn rực rỡ.' },
+  { src: 'assets/memories/07-phao-hoa.jpg', alt: 'Hai người đứng cạnh nhau dưới ánh pháo hoa màu tím', title: 'Một bầu trời đầy ánh sáng', caption: 'Có em bên cạnh, khoảnh khắc nào cũng trở nên lung linh hơn.' },
+  { src: 'assets/memories/08-em-va-bup-be.jpg', alt: 'Cô ấy mỉm cười cùng những món đồ chơi đáng yêu', title: 'Em và những điều dễ thương', caption: 'Nhìn em vui vẻ là một trong những điều anh thích nhất.' },
+  { src: 'assets/memories/09-nu-cuoi-cua-em.jpg', alt: 'Cô ấy mỉm cười trong một quán cà phê', title: 'Nụ cười anh muốn ngắm mãi', caption: 'Chỉ một nụ cười của em cũng đủ làm ngày của anh dịu lại.' },
+  { src: 'assets/memories/10-ngay-cuoi-ruc-ro.jpg', alt: 'Hai người nắm tay nhau trong không gian lễ cưới rực rỡ', title: 'Ngày mình thật rực rỡ', caption: 'Anh vẫn nhớ cảm giác được cùng em bước qua những ánh đèn ấy.' },
+  { src: 'assets/memories/11-em-mac-ao-hong.jpg', alt: 'Cô ấy mỉm cười trong chiếc áo màu hồng', title: 'Em dịu dàng như một buổi chiều', caption: 'Mỗi phiên bản của em đều là phiên bản anh thương.' },
+  { src: 'assets/memories/12-bau-troi-cua-doi-minh.jpg', alt: 'Hai người chụp ảnh cùng nhau dưới bầu trời xanh', title: 'Một bầu trời có đôi mình', caption: 'Sau này mình sẽ còn lưu thêm thật nhiều khoảnh khắc như thế này.' },
+];
 
+const playlist = [
+  { title: 'Chăm Em Một Đời', artist: 'Đức Phúc', src: 'assets/audio/cham-em-mot-doi.mp3' },
+];
+
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const elements = {
-  startButton: document.querySelector('#start-button'),
-  mission: document.querySelector('#mission'),
-  memorySection: document.querySelector('.memory-section'),
-  heartSection: document.querySelector('.heart-section'),
-  memoryProgress: document.querySelector('#memory-progress'),
-  liveStatus: document.querySelector('#live-status'),
-  progressLabel: document.querySelector('#progress-label'),
-  progressPercent: document.querySelector('#progress-percent'),
-  giftProgressFill: document.querySelector('#gift-progress-fill'),
-  giftButtons: [...document.querySelectorAll('[data-gift-id]')],
-  giftCards: [...document.querySelectorAll('[data-gift-card]')],
-  heartButtons: [...document.querySelectorAll('[data-heart-id]')],
-  heartCountLabel: document.querySelector('#heart-count-label'),
-  heartRow: document.querySelector('#heart-row'),
-  heartMessage: document.querySelector('#heart-message'),
-  finalSection: document.querySelector('#final-gift'),
-  finalCat: document.querySelector('#final-character-frame'),
-  finalTitle: document.querySelector('#final-title'),
-  finalDescription: document.querySelector('#final-description'),
-  finalButton: document.querySelector('#final-gift-button'),
-  finalMessage: document.querySelector('#final-message'),
-  finalImage: document.querySelector('#final-character-image'),
-  messageModal: document.querySelector('#message-modal'),
-  messageModalClose: document.querySelector('#message-modal-close'),
-  messageModalIcon: document.querySelector('#message-modal-icon'),
-  messageModalKicker: document.querySelector('#message-modal-kicker'),
-  messageModalTitle: document.querySelector('#message-modal-title'),
-  messageModalBody: document.querySelector('#message-modal-body'),
-  messageModalAction: document.querySelector('#message-modal-action'),
   musicAudio: document.querySelector('#background-audio'),
   musicIndicator: document.querySelector('#music-indicator'),
+  musicPlaylist: document.querySelector('#music-playlist'),
+  musicPlaylistClose: document.querySelector('#music-playlist-close'),
+  musicCurrentTrack: document.querySelector('#music-current-track'),
+  musicTrackList: document.querySelector('#music-track-list'),
+  musicPrevious: document.querySelector('#music-previous'),
+  musicNext: document.querySelector('#music-next'),
   memoryCards: [...document.querySelectorAll('.memory-card')],
   photoButtons: [...document.querySelectorAll('[data-photo-index]')],
   photoModal: document.querySelector('#photo-modal'),
@@ -62,122 +39,25 @@ const elements = {
   photoModalCaption: document.querySelector('#photo-modal-caption'),
   photoModalPrevious: document.querySelector('#photo-modal-previous'),
   photoModalNext: document.querySelector('#photo-modal-next'),
-  siteFooter: document.querySelector('#site-footer'),
+  letterEnvelope: document.querySelector('#letter-envelope'),
+  letterModal: document.querySelector('#letter-modal'),
+  letterModalClose: document.querySelector('#letter-modal-close'),
+  letterModalStatus: document.querySelector('#letter-modal-status'),
+  letterAnimationStage: document.querySelector('#letter-animation-stage'),
+  finalButton: document.querySelector('#final-gift-button'),
+  finalMessage: document.querySelector('#final-message'),
 };
 
-const heartMessages = [
-  'Em rất quan trọng với anh.',
-  'Ở bên em, ngày bình thường cũng thành ngày vui.',
-  'Anh thích cả những lúc em hơi khó tính.',
-  'Cảm ơn em vì luôn là chính mình.',
-  'Anh yêu em nhiều hơn những gì Miu Miu nói được.',
-];
-
-const memoryPhotos = [
-  {
-    src: 'assets/memories/01-non-la.jpg',
-    alt: 'Cô ấy đội nón lá giữa khung cảnh núi xanh',
-    title: 'Một chuyến đi có em',
-    caption: 'Đi đâu cũng thành một chuyến đi đáng nhớ khi có em.',
-  },
-  {
-    src: 'assets/memories/02-le-thanh-hon.png',
-    alt: 'Hai người đứng cạnh nhau trong ngày lễ thành hôn',
-    title: 'Ngày mình về chung một nhà',
-    caption: 'Một ngày thật đẹp, nơi câu chuyện của mình bước sang trang mới.',
-  },
-  {
-    src: 'assets/memories/03-selfie-dem.jpg',
-    alt: 'Hai người chụp selfie buổi tối bên những tòa tháp ánh sáng',
-    title: 'Một buổi tối rất vui',
-    caption: 'Chỉ cần đứng cạnh nhau, một buổi tối bình thường cũng đủ ấm áp.',
-  },
-  {
-    src: 'assets/memories/04-cung-tren-may-bay.jpg',
-    alt: 'Hai người ngồi cạnh nhau trên máy bay',
-    title: 'Cùng nhau đi thật xa',
-    caption: 'Có những chuyến bay ngắn nhưng lại mang theo rất nhiều kỷ niệm.',
-  },
-  {
-    src: 'assets/memories/05-anh-cuoi.jpg',
-    alt: 'Hai người trong trang phục cưới giữa không gian hoa trắng',
-    title: 'Ngày hạnh phúc của mình',
-    caption: 'Anh muốn giữ nụ cười này thật lâu, thật lâu nữa.',
-  },
-  {
-    src: 'assets/memories/06-co-ay-ao-do.jpg',
-    alt: 'Cô ấy mặc áo đỏ giữa những lá cờ Việt Nam',
-    title: 'Cô gái anh thương nhất',
-    caption: 'Dù em mặc màu gì, trong mắt anh em vẫn luôn rực rỡ.',
-  },
-  {
-    src: 'assets/memories/07-phao-hoa.jpg',
-    alt: 'Hai người đứng cạnh nhau dưới ánh pháo hoa màu tím',
-    title: 'Một bầu trời đầy ánh sáng',
-    caption: 'Có em bên cạnh, khoảnh khắc nào cũng trở nên lung linh hơn.',
-  },
-  {
-    src: 'assets/memories/08-em-va-bup-be.jpg',
-    alt: 'Cô ấy mỉm cười cùng những món đồ chơi đáng yêu',
-    title: 'Em và những điều dễ thương',
-    caption: 'Nhìn em vui vẻ là một trong những điều anh thích nhất.',
-  },
-  {
-    src: 'assets/memories/09-nu-cuoi-cua-em.jpg',
-    alt: 'Cô ấy mỉm cười trong một quán cà phê',
-    title: 'Nụ cười anh muốn ngắm mãi',
-    caption: 'Chỉ một nụ cười của em cũng đủ làm ngày của anh dịu lại.',
-  },
-  {
-    src: 'assets/memories/10-ngay-cuoi-ruc-ro.jpg',
-    alt: 'Hai người nắm tay nhau trong không gian lễ cưới rực rỡ',
-    title: 'Ngày mình thật rực rỡ',
-    caption: 'Anh vẫn nhớ cảm giác được cùng em bước qua những ánh đèn ấy.',
-  },
-  {
-    src: 'assets/memories/11-em-mac-ao-hong.jpg',
-    alt: 'Cô ấy mỉm cười trong chiếc áo màu hồng',
-    title: 'Em dịu dàng như một buổi chiều',
-    caption: 'Mỗi phiên bản của em đều là phiên bản anh thương.',
-  },
-  {
-    src: 'assets/memories/12-bau-troi-cua-doi-minh.jpg',
-    alt: 'Hai người chụp ảnh cùng nhau dưới bầu trời xanh',
-    title: 'Một bầu trời có đôi mình',
-    caption: 'Sau này mình sẽ còn lưu thêm thật nhiều khoảnh khắc như thế này.',
-  },
-];
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-let modalReturnFocus = null;
-let photoModalReturnFocus = null;
 let activePhotoIndex = 0;
-
-function announce(message) {
-  elements.liveStatus.textContent = message;
-}
-
-function openMessageModal(type, content) {
-  const modalContent = createModalContent(type, content);
-
-  elements.messageModalIcon.textContent = modalContent.icon;
-  elements.messageModalKicker.textContent = modalContent.kicker;
-  elements.messageModalTitle.textContent = modalContent.title;
-  elements.messageModalBody.textContent = modalContent.body;
-  elements.messageModalAction.textContent = modalContent.actionLabel;
-  modalReturnFocus = document.activeElement;
-  elements.messageModal.showModal();
-}
-
-function closeMessageModal() {
-  if (elements.messageModal.open) {
-    elements.messageModal.close();
-  }
-}
+let photoModalReturnFocus = null;
+let memoryObserver = null;
+let letterOpened = false;
+let letterFlight = null;
+let letterTimers = [];
+let activeTrackIndex = 0;
 
 function updatePhotoModal() {
   const photo = memoryPhotos[activePhotoIndex];
-
   elements.photoModalImage.src = photo.src;
   elements.photoModalImage.alt = photo.alt;
   elements.photoModalCounter.textContent = formatPhotoCounter(activePhotoIndex, memoryPhotos.length);
@@ -204,46 +84,9 @@ function movePhoto(direction) {
   updatePhotoModal();
 }
 
-function scrollToSection(section) {
-  section.scrollIntoView({
-    behavior: prefersReducedMotion ? 'auto' : 'smooth',
-    block: 'start',
-  });
-}
-
-function unlockNextJourneySection(shouldScroll = false) {
-  const journeySections = {
-    mission: elements.mission,
-    memory: elements.memorySection,
-    hearts: elements.heartSection,
-    final: elements.finalSection,
-  };
-  const nextSection = journeySections[getJourneyStep(missionState)];
-
-  if (!nextSection) {
-    return;
-  }
-
-  nextSection.hidden = false;
-  nextSection.classList.add('is-unlocked');
-
-  if (shouldScroll) {
-    pendingJourneyScroll = nextSection;
-  }
-
-  if (nextSection === elements.memorySection) {
-    startMemoryReveal();
-  }
-}
-
-function flushPendingJourneyScroll() {
-  if (!pendingJourneyScroll) {
-    return;
-  }
-
-  const nextSection = pendingJourneyScroll;
-  pendingJourneyScroll = null;
-  scrollToSection(nextSection);
+function revealMemoryCard(card, observer) {
+  card.classList.add('is-visible');
+  observer?.unobserve(card);
 }
 
 function startMemoryReveal() {
@@ -252,198 +95,82 @@ function startMemoryReveal() {
   }
 
   if (!('IntersectionObserver' in window)) {
-    elements.memoryCards.forEach((card) => {
-      card.classList.add('is-visible');
-      const photoButton = card.querySelector('[data-photo-index]');
-      recordViewedPhoto(Number(photoButton.dataset.photoIndex));
-    });
+    elements.memoryCards.forEach((card) => revealMemoryCard(card));
     return;
   }
 
   memoryObserver = new IntersectionObserver((entries, observer) => {
     entries.forEach((entry) => {
-      if (!entry.isIntersecting) {
-        return;
+      if (entry.isIntersecting) {
+        revealMemoryCard(entry.target, observer);
       }
-
-      const card = entry.target;
-      const photoButton = card.querySelector('[data-photo-index]');
-      card.classList.add('is-visible');
-      observer.unobserve(card);
-      recordViewedPhoto(Number(photoButton.dataset.photoIndex));
     });
-  }, {
-    threshold: 0.55,
-    rootMargin: '0px 0px -8% 0px',
-  });
+  }, { threshold: 0.35, rootMargin: '0px 0px -8% 0px' });
 
   elements.memoryCards.forEach((card) => memoryObserver.observe(card));
 }
 
-function recordViewedPhoto(photoIndex) {
-  const nextState = viewPhoto(missionState, `photo-${photoIndex + 1}`);
+function updatePlaylistSelection() {
+  const activeTrack = playlist[activeTrackIndex];
+  elements.musicCurrentTrack.textContent = `${activeTrack.title} · ${activeTrack.artist}`;
 
-  if (nextState === missionState) {
-    return;
-  }
-
-  missionState = nextState;
-  updateMemoryProgress();
-  announce(`Đã xem ${missionState.viewedPhotos.length} trên ${photoCount} ảnh kỷ niệm.`);
-
-  if (isMemoryComplete(missionState)) {
-    unlockNextJourneySection(true);
-    announce('Đã xem đủ 12 ảnh kỷ niệm. Phần thu thập trái tim đã mở khóa.');
-
-    if (!elements.photoModal.open && !elements.messageModal.open) {
-      window.setTimeout(flushPendingJourneyScroll, prefersReducedMotion ? 0 : 360);
-    }
-  }
-}
-
-function updateMemoryProgress() {
-  elements.memoryProgress.textContent = `Đã xem ${missionState.viewedPhotos.length}/${photoCount} ảnh`;
-}
-
-function updateGiftProgress() {
-  const openedCount = missionState.openedGifts.length;
-  const percent = Math.round((openedCount / giftCount) * 100);
-
-  elements.progressLabel.textContent = `Đã mở ${openedCount}/${giftCount} hộp quà`;
-  elements.progressPercent.textContent = `${percent}%`;
-  elements.giftProgressFill.style.width = `${percent}%`;
-}
-
-function updateHeartProgress() {
-  const collectedCount = missionState.collectedHearts.length;
-  const heartSymbols = Array.from({ length: heartCount }, (_, index) =>
-    index < collectedCount ? '♥' : '♡',
-  );
-
-  elements.heartCountLabel.textContent = `${collectedCount}/${heartCount} trái tim`;
-  elements.heartRow.textContent = heartSymbols.join(' ');
-}
-
-function updateFinalGiftState() {
-  if (!isFinalGiftUnlocked(missionState)) {
-    return;
-  }
-
-  elements.finalButton.disabled = false;
-  elements.finalSection.classList.add('is-unlocked');
-  elements.finalTitle.textContent = 'Miu Miu đã sẵn sàng!';
-  elements.heartMessage.textContent = 'Meo! Đủ yêu thương để mở quà rồi!';
-  unlockNextJourneySection(true);
-  announce('Đã đủ yêu thương. Hộp quà cuối cùng đã được mở khóa.');
-}
-
-function handleStart() {
-  document.body.classList.add('mission-started');
-  elements.startButton.textContent = 'Đã bắt đầu · đi thôi!';
-  elements.startButton.disabled = true;
-  unlockNextJourneySection();
-  announce('Nhiệm vụ bắt đầu. Hãy mở ba hộp quà nhỏ nhé.');
-  scrollToSection(elements.mission);
-}
-
-function handleGiftClick(event) {
-  const button = event.currentTarget;
-  const giftId = button.dataset.giftId;
-  const nextState = openGift(missionState, giftId);
-
-  if (nextState === missionState) {
-    return;
-  }
-
-  missionState = nextState;
-  const card = document.querySelector(`[data-gift-card="${giftId}"]`);
-  card.classList.add('is-open');
-  button.disabled = true;
-  updateGiftProgress();
-
-  const openedCount = missionState.openedGifts.length;
-  announce(`Đã mở hộp quà ${openedCount} trên ${giftCount}.`);
-  document.body.classList.add('cat-helping');
-  const showGiftMessage = () => {
-    const giftMessage = giftId === 'thanks'
-      ? card.querySelector('.gift-open-message')
-      : card.querySelector('.gift-message');
-
-    openMessageModal('gift', {
-      icon: card.querySelector('.gift-card-icon').dataset.giftIcon,
-      title: card.querySelector('h3').textContent.trim(),
-      body: giftMessage.textContent.trim(),
-    });
-  };
-
-  if (giftId === 'thanks' && !prefersReducedMotion) {
-    window.setTimeout(showGiftMessage, 720);
-  } else {
-    showGiftMessage();
-  }
-
-  if (openedCount === giftCount) {
-    unlockNextJourneySection(true);
-    announce('Đã mở đủ 3 hộp quà. Góc kỷ niệm đã mở khóa.');
-  }
-}
-
-function handleHeartClick(event) {
-  const button = event.currentTarget;
-  const heartId = button.dataset.heartId;
-  const heartIndex = Number(heartId.replace('heart-', '')) - 1;
-  const nextState = collectHeart(missionState, heartId);
-
-  if (nextState === missionState) {
-    return;
-  }
-
-  missionState = nextState;
-  button.classList.add('is-collected');
-  button.disabled = true;
-  elements.heartMessage.textContent = heartMessages[heartIndex];
-  updateHeartProgress();
-  announce(`Đã thu thập ${missionState.collectedHearts.length} trên ${heartCount} trái tim.`);
-
-  if (isFinalGiftUnlocked(missionState)) {
-    updateFinalGiftState();
-  }
-
-  openMessageModal('heart', {
-    icon: '♥',
-    title: 'Một điều anh muốn nói',
-    body: heartMessages[heartIndex],
+  elements.musicTrackList.querySelectorAll('[data-track-index]').forEach((trackButton) => {
+    const isActive = Number(trackButton.dataset.trackIndex) === activeTrackIndex;
+    trackButton.classList.toggle('is-active', isActive);
+    trackButton.setAttribute('aria-current', String(isActive));
   });
 }
 
-function handleFinalGiftClick() {
-  if (!isFinalGiftUnlocked(missionState)) {
-    return;
-  }
+function renderPlaylist() {
+  elements.musicTrackList.innerHTML = playlist.map((track, index) => `
+    <button class="music-track" type="button" data-track-index="${index}" aria-current="${index === activeTrackIndex}" role="option">
+      <span><strong>${track.title}</strong><small>${track.artist}</small></span>
+      <span aria-hidden="true">♫</span>
+    </button>
+  `).join('');
 
-  missionState = openFinalGift(missionState);
-  elements.finalButton.disabled = true;
-  elements.finalButton.textContent = 'Đã mở quà ♥';
-  elements.finalMessage.hidden = false;
-  elements.finalSection.classList.add('is-complete');
-  const finalImageContent = getFinalImageContent(true);
-  elements.finalImage.src = finalImageContent.src;
-  elements.finalImage.alt = finalImageContent.alt;
-  elements.finalCat.setAttribute('aria-label', finalImageContent.alt);
-  elements.siteFooter.hidden = false;
-  document.body.classList.add('cat-celebrating');
-  announce('Miu Miu đã hoàn thành nhiệm vụ. Chúc mừng 20/10!');
-  openMessageModal('final', {
-    icon: '▣',
-    title: elements.finalMessage.querySelector('h2').textContent.trim(),
-    body: [...elements.finalMessage.querySelectorAll('p:not(.eyebrow)')]
-      .map((paragraph) => paragraph.textContent.trim())
-      .join(' '),
+  elements.musicTrackList.querySelectorAll('[data-track-index]').forEach((trackButton) => {
+    trackButton.addEventListener('click', handleTrackSelect);
   });
+  updatePlaylistSelection();
+}
+
+function loadTrack(trackIndex, shouldPlay = true) {
+  activeTrackIndex = (trackIndex + playlist.length) % playlist.length;
+  const track = playlist[activeTrackIndex];
+  elements.musicAudio.src = track.src;
+  elements.musicAudio.load();
+  updatePlaylistSelection();
+
+  if (shouldPlay) {
+    tryStartMusic();
+  }
+}
+
+function handleTrackSelect(event) {
+  loadTrack(Number(event.currentTarget.dataset.trackIndex));
+}
+
+function handlePlaylistToggle() {
+  const willOpen = elements.musicPlaylist.hidden;
+  elements.musicPlaylist.hidden = !willOpen;
+  elements.musicIndicator.setAttribute('aria-expanded', String(willOpen));
+}
+
+function handlePlaylistClose() {
+  elements.musicPlaylist.hidden = true;
+  elements.musicIndicator.setAttribute('aria-expanded', 'false');
+}
+
+function handleTrackEnded() {
+  loadTrack(activeTrackIndex + 1);
 }
 
 function updateMusicIndicator(isPlaying) {
-  elements.musicIndicator.setAttribute('aria-label', isPlaying ? 'Nhạc nền đang phát' : 'Nhạc nền đang chờ phát');
+  const activeTrack = playlist[activeTrackIndex];
+  elements.musicIndicator.setAttribute('aria-label', isPlaying
+    ? `Đang phát ${activeTrack.title}. Mở danh sách nhạc`
+    : 'Mở danh sách nhạc nền');
   elements.musicIndicator.classList.toggle('is-playing', isPlaying);
 }
 
@@ -453,15 +180,98 @@ async function tryStartMusic() {
   try {
     await elements.musicAudio.play();
     updateMusicIndicator(true);
-    announce('Nhạc nền đang bật.');
   } catch {
     updateMusicIndicator(false);
-    announce('Nhạc nền sẽ tự phát sau tương tác đầu tiên.');
   }
 }
 
-let musicInteractionHandled = false;
+function revealLetter() {
+  letterOpened = true;
+  elements.letterAnimationStage.hidden = true;
+  elements.finalMessage.hidden = false;
+  elements.letterModal.classList.add('is-reading');
+  elements.letterModalStatus.textContent = '';
+  elements.finalButton.textContent = 'Đọc lại lá thư ♡';
+  elements.finalMessage.focus({ preventScroll: true });
+}
 
+function scheduleLetterStep(callback, delay) {
+  letterTimers.push(window.setTimeout(() => {
+    if (elements.letterModal.open) {
+      callback();
+    }
+  }, delay));
+}
+
+function handleLetterClick() {
+  if (elements.letterModal.open) {
+    return;
+  }
+
+  const sourceRect = elements.letterEnvelope.getBoundingClientRect();
+  elements.letterModal.showModal();
+  document.documentElement.classList.add('letter-modal-open');
+  elements.finalButton.setAttribute('aria-expanded', 'true');
+  elements.letterModalClose.focus({ preventScroll: true });
+
+  if (letterOpened || prefersReducedMotion) {
+    revealLetter();
+    return;
+  }
+
+  const envelope = elements.letterEnvelope.cloneNode(true);
+  envelope.removeAttribute('id');
+  elements.letterAnimationStage.replaceChildren(envelope);
+  elements.letterAnimationStage.hidden = false;
+  elements.letterEnvelope.classList.add('is-in-modal');
+  elements.letterModalStatus.textContent = 'Phong thư đang mở…';
+
+  const targetRect = envelope.getBoundingClientRect();
+  const deltaX = sourceRect.left + sourceRect.width / 2 - targetRect.left - targetRect.width / 2;
+  const deltaY = sourceRect.top + sourceRect.height / 2 - targetRect.top - targetRect.height / 2;
+  const scale = sourceRect.width / targetRect.width;
+  const animation = envelope.animate([
+    { transform: `translate(${deltaX}px, ${deltaY}px) scale(${scale}) rotate(10deg)` },
+    { transform: 'translate(0, 0) scale(1) rotate(0deg)' },
+  ], { duration: 450, easing: 'cubic-bezier(.22, .75, .25, 1)', fill: 'backwards' });
+  letterFlight = animation;
+
+  animation.finished.then(() => {
+    if (!elements.letterModal.open || letterFlight !== animation) {
+      return;
+    }
+
+    envelope.classList.add('is-opening');
+    scheduleLetterStep(() => {
+      envelope.classList.add('is-open');
+      scheduleLetterStep(revealLetter, 450);
+    }, 650);
+  }).catch(() => {
+    // Closing the dialog cancels the flight before the letter is revealed.
+  });
+}
+
+function closeLetterModal() {
+  elements.letterModal.close();
+}
+
+function resetLetterModal() {
+  letterFlight?.cancel();
+  letterFlight = null;
+  letterTimers.forEach(timer => window.clearTimeout(timer));
+  letterTimers = [];
+  elements.letterAnimationStage.replaceChildren();
+  elements.letterAnimationStage.hidden = true;
+  elements.letterEnvelope.classList.remove('is-in-modal');
+  elements.finalMessage.hidden = true;
+  elements.letterModal.classList.remove('is-reading');
+  elements.letterModalStatus.textContent = '';
+  document.documentElement.classList.remove('letter-modal-open');
+  elements.finalButton.setAttribute('aria-expanded', 'false');
+  elements.finalButton.focus({ preventScroll: true });
+}
+
+let musicInteractionHandled = false;
 function startMusicAfterFirstInteraction() {
   if (musicInteractionHandled) {
     return;
@@ -471,32 +281,8 @@ function startMusicAfterFirstInteraction() {
   tryStartMusic();
 }
 
-elements.startButton.addEventListener('click', handleStart);
-elements.giftButtons.forEach((button) => button.addEventListener('click', handleGiftClick));
-elements.heartButtons.forEach((button) => button.addEventListener('click', handleHeartClick));
-elements.finalButton.addEventListener('click', handleFinalGiftClick);
-document.addEventListener('pointerdown', startMusicAfterFirstInteraction, { once: true, passive: true });
-document.addEventListener('keydown', startMusicAfterFirstInteraction, { once: true });
 elements.photoButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    const photoIndex = Number(button.dataset.photoIndex);
-    openPhotoModal(photoIndex);
-  });
-});
-elements.messageModalClose.addEventListener('click', closeMessageModal);
-elements.messageModalAction.addEventListener('click', closeMessageModal);
-elements.messageModal.addEventListener('click', (event) => {
-  if (event.target === elements.messageModal) {
-    closeMessageModal();
-  }
-});
-elements.messageModal.addEventListener('close', () => {
-  if (modalReturnFocus && !modalReturnFocus.disabled) {
-    modalReturnFocus.focus();
-  }
-
-  modalReturnFocus = null;
-  flushPendingJourneyScroll();
+  button.addEventListener('click', () => openPhotoModal(Number(button.dataset.photoIndex)));
 });
 elements.photoModalClose.addEventListener('click', closePhotoModal);
 elements.photoModalPrevious.addEventListener('click', () => movePhoto(-1));
@@ -512,11 +298,25 @@ elements.photoModal.addEventListener('close', () => {
   }
 
   photoModalReturnFocus = null;
-  flushPendingJourneyScroll();
 });
+elements.musicIndicator.addEventListener('click', handlePlaylistToggle);
+elements.musicPlaylistClose.addEventListener('click', handlePlaylistClose);
+elements.musicPrevious.addEventListener('click', () => loadTrack(activeTrackIndex - 1));
+elements.musicNext.addEventListener('click', () => loadTrack(activeTrackIndex + 1));
+elements.musicAudio.addEventListener('ended', handleTrackEnded);
+elements.finalButton.addEventListener('click', handleLetterClick);
+elements.letterModalClose.addEventListener('click', closeLetterModal);
+elements.letterModal.addEventListener('close', resetLetterModal);
+elements.letterModal.addEventListener('click', (event) => {
+  if (event.target === elements.letterModal) {
+    closeLetterModal();
+  }
+});
+document.addEventListener('pointerdown', startMusicAfterFirstInteraction, { once: true, passive: true });
+document.addEventListener('keydown', startMusicAfterFirstInteraction, { once: true });
 
-updateGiftProgress();
-updateHeartProgress();
-updateMemoryProgress();
+elements.memoryCards.forEach((card) => card.classList.remove('is-visible'));
+startMemoryReveal();
+renderPlaylist();
 updateMusicIndicator(false);
 tryStartMusic();
